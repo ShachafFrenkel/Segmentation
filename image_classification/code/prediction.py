@@ -221,5 +221,32 @@ if __name__ == '__main__':
     # boundary[watershed_on_predictions_0 == 0] = 1
     # boundary[watershed_on_predictions_1 == 0] = 1
     # tifffile.imsave(f'outputs/boundaries_watershed.tif',boundary)
+    # pre_watershed = np.zeros((seg_new_NEW.shape[0],seg_new_NEW.shape[1]))
+    # pre_watershed[seg_new_NEW == 0]=1.0
+    # tifffile.imsave(f'outputs/pre_watershed.tif',pre_watershed)
+    # from scipy import ndimage as ndi
+    # from skimage.feature import peak_local_max
+    # distance = ndi.distance_transform_edt(pre_watershed)
+    # coords = peak_local_max(distance)
+    # mask = np.zeros(distance.shape, dtype=bool)
+    # mask[tuple(coords.T)] = True
+    # markers, _ = ndi.label(mask)
+    # labels = skl.segmentation.watershed(-distance, markers, mask=pre_watershed)
+    #
+    # tifffile.imsave(f'outputs/watershed_img.tif',labels)
 
-    pre_watershed =
+    from skimage.feature import peak_local_max
+    from scipy import ndimage as ndi
+
+    HC = skl.morphology.erosion(seg_del_eros, np.ones((7, 7), np.uint8))
+
+    bound = seg_del_eros - HC
+    boundary = skl.morphology.dilation(bound, kernel_dil)
+
+    watershed = skl.segmentation.watershed(boundary, watershed_line=True)
+
+    segmentation = watershed + HC
+
+    tifffile.imsave(f'outputs/watershed_img_new.tif', watershed)
+    tifffile.imsave(f'outputs/boundary_img_new.tif', boundary)
+    tifffile.imsave(f'outputs/seg_img_new.tif', segmentation)
